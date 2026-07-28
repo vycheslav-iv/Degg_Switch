@@ -1,7 +1,7 @@
 class DeggSwitch:
     @classmethod
     def INPUT_TYPES(cls):
-        inputs = {
+        return {
             "required": {
                 "select": ("INT", {
                     "default": 1,
@@ -11,15 +11,10 @@ class DeggSwitch:
                     "tooltip": "Номер входа, который будет выведен на выход",
                 }),
             },
-            "optional": {},
-            "hidden": {
-                "unique_id": "UNIQUE_ID",
+            "optional": {
+                "input_1": ("*", {}),
             },
         }
-        # Объявляем все 20 входов как optional с lazy=True
-        for i in range(1, 21):
-            inputs["optional"][f"input_{i}"] = ("*", {"lazy": True})
-        return inputs
 
     RETURN_TYPES = ("*",)
     RETURN_NAMES = ("output",)
@@ -32,11 +27,6 @@ class DeggSwitch:
         "Входы создаются динамически — при подключении к входу N появляется вход N+1. "
         "Максимум 20 входов."
     )
-
-    def check_lazy_status(self, select, **kwargs):
-        """Запрашиваем только выбранный вход, остальные не вычисляем."""
-        selected = f"input_{int(select)}"
-        return [selected]
 
     def process(self, select, **kwargs):
         selected = f"input_{int(select)}"
