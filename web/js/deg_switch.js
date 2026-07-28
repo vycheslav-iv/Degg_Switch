@@ -1,4 +1,4 @@
-import { app } from "../../../scripts/app.js";
+const { app } = window.comfyAPI.app;
 
 const MAX_INPUTS = 20;
 
@@ -47,15 +47,6 @@ function rebuildInputs(node) {
         if (selectWidget.value > maxVal) {
             selectWidget.value = maxVal;
         }
-        updateOutputLabel(node);
-    }
-}
-
-function updateOutputLabel(node) {
-    const selectWidget = node.widgets?.find(w => w.name === "select");
-    if (selectWidget && node.outputs?.[0]) {
-        node.outputs[0].label = `\u2192 \u0432\u0445\u043e\u0434 ${selectWidget.value}`;
-        node.graph?.setDirtyCanvas(true, true);
     }
 }
 
@@ -69,19 +60,7 @@ app.registerExtension({
         nodeType.prototype.onNodeCreated = function () {
             const ret = origOnNodeCreated?.apply(this, arguments);
 
-            const selectWidget = this.widgets?.find(w => w.name === "select");
-
-            // Update output label when select changes
-            if (selectWidget) {
-                selectWidget.options.max = MAX_INPUTS;
-                const origCb = selectWidget.callback;
-                selectWidget.callback = function (value) {
-                    if (origCb) origCb(value);
-                    updateOutputLabel(this);
-                };
-            }
-
-            // Rebuild to initial state (only input_1)
+            // Start with input_1 only
             rebuildInputs(this);
 
             return ret;
@@ -93,7 +72,6 @@ app.registerExtension({
 
             // type === 1 means input connection changed
             if (type === 1) {
-                // Use setTimeout to avoid modifying inputs during connection processing
                 setTimeout(() => {
                     rebuildInputs(this);
                 }, 0);
